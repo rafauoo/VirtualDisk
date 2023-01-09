@@ -79,12 +79,16 @@ int main (int argc, char *argv[]) {
             printf("Wrong disk name!\n");
             return 0;
         }
-        if (remove_file_from_virtual_disk(disk, argv[3]) != 0) {
-            printf("Error occured: can't delete that file!\n");
-            return 0;
+        switch (remove_file_from_virtual_disk(disk, argv[3]))
+        {
+        case FILE_NOT_FOUND_ON_DISK:
+            printf("ERROR: File with that name (%s) not found on virtual disk!\n", argv[3]);
+            break;
+        default:
+            save_virtual_disk(disk, argv[2]);
+            printf("File removed successfully!\n");
+            break;
         }
-        save_virtual_disk(disk, argv[2]);
-        printf("File removed successfully!\n");
         return 0;
     }
 
@@ -94,12 +98,28 @@ int main (int argc, char *argv[]) {
             printf("Wrong disk name!\n");
             return 0;
         }
-        if (copy_file_to_virtual_disk(disk, argv[3], argv[4]) != 0) {
-            printf("Error occured: can't copy file to disk!\n");
-            return 0;
+        switch (copy_file_to_virtual_disk(disk, argv[3], argv[4]))
+        {
+        case CANT_ACCESS_FILE:
+            printf("ERROR: File with name %s doesn't exist!\n", argv[3]);
+            break;
+        case MEMORY_ALLOC_ERROR:
+            printf("ERROR: Can't allocate memory for data!\n");
+            break;
+        case NOT_ENOUGH_FREE_MEMORY:
+            printf("ERROR: Not enough free memory on disk to copy this file!\n");
+            break;
+        case FILE_WITH_THAT_NAME_EXISTS:
+            printf("ERROR: Source file with that name (%s) already exists!\n", argv[4]);
+            break;
+        case FREE_BLOCK_NOT_FOUND:
+            printf("ERROR: No free blocks of memory found on disk!\n");
+            break;
+        default:
+            save_virtual_disk(disk, argv[2]);
+            printf("File copied successfully!\n");
+            break;
         }
-        save_virtual_disk(disk, argv[2]);
-        printf("File copied successfully!\n");
         return 0;
     }
 
@@ -109,12 +129,18 @@ int main (int argc, char *argv[]) {
             printf("Wrong disk name!\n");
             return 0;
         }
-        if (copy_file_from_virtual_disk(disk, argv[3], argv[4]) != 0) {
-            printf("Error occured: can't copy file from disk!\n");
-            return 0;
+        switch (copy_file_from_virtual_disk(disk, argv[3], argv[4]))
+        {
+        case FILE_NOT_FOUND_ON_DISK:
+            printf("ERROR: File with that name doesn't exist on virtual disk!\n");
+            break;
+        case CANT_ACCESS_FILE:
+            printf("ERROR: Can't access output file (%s)!\n", argv[4]);
+            break;
+        default:
+            save_virtual_disk(disk, argv[2]);
+            printf("File copied successfully!\n");
         }
-        save_virtual_disk(disk, argv[2]);
-        printf("File copied successfully!\n");
         return 0;
     }
 

@@ -30,10 +30,10 @@ struct VirtualDisk
 // tworzenie nowego dysku wirtualnego o zadanym rozmiarze i rozmiarze bloku
 struct VirtualDisk* create_virtual_disk(int size, int block_size);
 
-// kopiowanie pliku z dysku systemu Minix na dysk wirtualny
+// kopiowanie pliku z dysku systemu na dysk wirtualny
 int copy_file_to_virtual_disk(struct VirtualDisk* disk, const char* src_filename, const char* dest_filename);
 
-// kopiowanie pliku z dysku wirtualnego na dysk systemu Minix
+// kopiowanie pliku z dysku wirtualnego na dysk systemu
 int copy_file_from_virtual_disk(struct VirtualDisk* disk, const char* src_filename, const char* dest_filename);
 
 // wyświetlanie zawartości katalogu dysku wirtualnego
@@ -48,10 +48,10 @@ void delete_virtual_disk(struct VirtualDisk* disk);
 // wyświetlanie mapy zajętości dysku wirtualnego
 void print_disk_map(const struct VirtualDisk* disk);
 
-// Zapisanie dysku wirtualnego do pliku
+// zapisanie dysku wirtualnego do pliku
 int save_virtual_disk(const struct VirtualDisk* disk, const char* filename);
 
-// Ładowanie dysku wirtualnego z pliku
+// ładowanie dysku wirtualnego z pliku
 struct VirtualDisk* load_virtual_disk(const char* filename);
 
 #endif  // FILE_SYSTEM_H
