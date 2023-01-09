@@ -249,16 +249,16 @@ int remove_file_from_virtual_disk(struct VirtualDisk* disk, const char* filename
 // Wyświetlanie zawartości katalogu dysku.
 void print_directory(const struct VirtualDisk* disk)
 {
-    printf("Zawartość katalogu:\n");
+    printf("Contents of the disk:\n");
     for (int i = 0; i < disk->num_files; i++)
-        printf(" %s (%d B) [na dysku (%d B)]\n", disk->files[i].name, disk->files[i].size,
+        printf(" %s (%d B) [on disk: (%d B)]\n", disk->files[i].name, disk->files[i].size,
         (disk->files[i].size / disk->block_size + 1) * disk->block_size);
 }
 
 // Wyświetlanie mapy zajętości dysku.
 void print_disk_map(const struct VirtualDisk* disk)
 {
-    printf("Mapa zajętości dysku:\n");
+    printf("Disk memory map:\n");
     for (int i = 0; i < disk->num_blocks; i++)
     {
         int occupied = 0;
@@ -267,12 +267,12 @@ void print_disk_map(const struct VirtualDisk* disk)
                 occupied++;
             }
         }
-        printf(" Blok %d: ", i);
+        printf(" Block %d: ", i);
         if (is_block_free(disk, i)) {
-            printf("wolny (%d B) / (%d B)", occupied, disk->block_size);
+            printf("free (%d B) / (%d B)", occupied, disk->block_size);
         }
         else {
-            printf("zajęty (%d B) / (%d B)", occupied, disk->block_size);
+            printf("occupied (%d B) / (%d B)", occupied, disk->block_size);
         }
         printf("\n");
     }
@@ -282,7 +282,7 @@ void print_disk_map(const struct VirtualDisk* disk)
             occ_blocks++;
         }
     }
-    printf("Zajęte miejsce na dysku: %d B / %d B\n", occ_blocks * disk->block_size, disk->size);
+    printf(": %d B / %d B\n", occ_blocks * disk->block_size, disk->size);
 }
 
 // Kopiowanie pliku z dysku systemu do dysku wirtualnego.

@@ -1,11 +1,11 @@
-// FILE USED AS COMMAND
-// USAGE vd [create | delete] <disk_name>
 #include "fs.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 
+
+// Help - available usages of command.
 void print_help() {
         printf("Available usages:\n");
         printf("  vd create <disk_name> <size> <block_size> - Creates a virtual disk with given disk name, size (B) & block size (B)\n");
@@ -25,20 +25,24 @@ int main (int argc, char *argv[]) {
     }
 
 
-    // Creating Virtual Disk
+    // Creating Virtual Disk.
     if (strcmp(argv[1], "create") == 0) {
+        // checking if argc is not too big
         if (argc < 5) {
             print_help();
             return 0;
         }
+        // checking if size and block size are digits
         if (!isdigit(*argv[3]) || !isdigit(*argv[4])) {
             printf("Size and Block size have to be numbers!\n");
             return 0;
         }
+        // checking if size % block size equals 0
         if (atoi(argv[3]) % atoi(argv[4]) != 0) {
             printf("Size has to be divisable by block size!\n");
             return 0;
         }
+        // creating virutal disk
         struct VirtualDisk* disk = create_virtual_disk(atoi(argv[3]), atoi(argv[4]));
         if (disk == NULL) {
             printf("Error allocating memory!\n");
@@ -49,8 +53,9 @@ int main (int argc, char *argv[]) {
         return 0;
     }
 
-    // Deleting Virtual Disk
+    // Deleting Virtual Disk.
     if (strcmp(argv[1], "delete") == 0) {
+        // checking if file ends with .vd
         if (argv[2][strlen(argv[2])-3] != '.' ||
             argv[2][strlen(argv[2])-2] != 'v' || 
             argv[2][strlen(argv[2])-1] != 'd')
@@ -58,6 +63,7 @@ int main (int argc, char *argv[]) {
             printf("Can't delete non-disk file!\n");
             return 0;
         }
+        // confirmation for deletion
         printf("Are you sure? You won't be able to revert deletion!\n");
         printf("Type 'YES' to confirm: ");
         char choice[100];
@@ -69,22 +75,27 @@ int main (int argc, char *argv[]) {
                 printf("Unable to delete the disk! Maybe disk with that name doesn't exist?\n");
         return 0;
         }
+        // user did not confirm deletion
         printf("Aborting...\n");
         return 0;
     }
 
+    // Removing file from Virtual Disk.
     if (strcmp(argv[1], "rm") == 0) {
+        // loading disk from file
         struct VirtualDisk* disk = load_virtual_disk(argv[2]);
         if (disk == NULL) {
             printf("Wrong disk name!\n");
             return 0;
         }
+        // error handling
         switch (remove_file_from_virtual_disk(disk, argv[3]))
         {
         case FILE_NOT_FOUND_ON_DISK:
             printf("ERROR: File with that name (%s) not found on virtual disk!\n", argv[3]);
             break;
         default:
+            // saving disk if no errors occured
             save_virtual_disk(disk, argv[2]);
             printf("File removed successfully!\n");
             break;
@@ -92,12 +103,15 @@ int main (int argc, char *argv[]) {
         return 0;
     }
 
+    // Copying file from system to Virtual Disk.
     if (strcmp(argv[1], "todisk") == 0) {
+        // loading disk from file
         struct VirtualDisk* disk = load_virtual_disk(argv[2]);
         if (disk == NULL) {
             printf("Wrong disk name!\n");
             return 0;
         }
+        // error handling
         switch (copy_file_to_virtual_disk(disk, argv[3], argv[4]))
         {
         case CANT_ACCESS_FILE:
@@ -116,6 +130,7 @@ int main (int argc, char *argv[]) {
             printf("ERROR: No free blocks of memory found on disk!\n");
             break;
         default:
+            // saving disk if no errors occured
             save_virtual_disk(disk, argv[2]);
             printf("File copied successfully!\n");
             break;
@@ -123,12 +138,15 @@ int main (int argc, char *argv[]) {
         return 0;
     }
 
+    // Copying file from Virtual Disk to system.
     if (strcmp(argv[1], "fromdisk") == 0) {
+        // loading disk from file
         struct VirtualDisk* disk = load_virtual_disk(argv[2]);
         if (disk == NULL) {
             printf("Wrong disk name!\n");
             return 0;
         }
+        // error handling
         switch (copy_file_from_virtual_disk(disk, argv[3], argv[4]))
         {
         case FILE_NOT_FOUND_ON_DISK:
@@ -138,32 +156,41 @@ int main (int argc, char *argv[]) {
             printf("ERROR: Can't access output file (%s)!\n", argv[4]);
             break;
         default:
+            // saving disk if no errors occured
             save_virtual_disk(disk, argv[2]);
             printf("File copied successfully!\n");
+            break;
         }
         return 0;
     }
 
+    // Showing contents of Virtual Disk.
     if (strcmp(argv[1], "ls") == 0) {
+        // loading disk from file
         struct VirtualDisk* disk = load_virtual_disk(argv[2]);
         if (disk == NULL) {
             printf("Wrong disk name!\n");
             return 0;
         }
+        // printing contents of disk
         print_directory(disk);
         return 0;
     }
 
+    // Showing Virtual Disk memory map.
     if (strcmp(argv[1], "blocks") == 0) {
+        // loading disk from file
         struct VirtualDisk* disk = load_virtual_disk(argv[2]);
         if (disk == NULL) {
             printf("Wrong disk name!\n");
             return 0;
         }
+        // printing map
         print_disk_map(disk);
         return 0;
     }
 
+    // printing help if no command matched
     print_help();
     return 0;
 }
