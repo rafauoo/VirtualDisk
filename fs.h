@@ -10,21 +10,19 @@
 #define FILE_WITH_THAT_NAME_EXISTS  1005
 #define FREE_BLOCK_NOT_FOUND        1006
 
-struct VirtualFile
-{
-  char name[MAX_FILENAME_LENGTH];
-  int size;
-  int start_block;  // indeks pierwszego bloku zajętego przez plik
+struct VirtualFile {
+    char name[MAX_FILENAME_LENGTH];
+    int size;
+    int start_block;  // indeks pierwszego bloku zajętego przez plik
 };
 
-struct VirtualDisk
-{
-  int size;
-  int block_size;
-  int num_blocks;
-  int num_files;
-  struct VirtualFile* files;
-  char* data;  // dane dysku wirtualnego
+struct VirtualDisk {
+    int size;
+    int block_size;
+    int num_blocks;
+    int num_files;
+    struct VirtualFile* files;
+    char* data;  // dane dysku (dane plików zawartych w strukturach VirtualFile)
 };
 
 // tworzenie nowego dysku wirtualnego o zadanym rozmiarze i rozmiarze bloku
@@ -53,5 +51,8 @@ int save_virtual_disk(const struct VirtualDisk* disk, const char* filename);
 
 // ładowanie dysku wirtualnego z pliku
 struct VirtualDisk* load_virtual_disk(const char* filename);
+
+// usuwanie dysku i zwalnianie pamięci (Na potrzeby testowania z poziomu programu)
+void delete_virtual_disk(struct VirtualDisk* disk);
 
 #endif  // FILE_SYSTEM_H

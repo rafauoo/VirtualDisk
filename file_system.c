@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Zwraca 1, jeśli blok o zadanym indeksie jest wolny, lub 0 w przeciwnym razie.
+// Zwraca 1, jeśli blok o zadanym indeksie jest wolny, lub 0 jeśli jest zajęty.
 int is_block_free(const struct VirtualDisk* disk, int index) {
     return disk->data[index * disk->block_size] == 0;
 }
@@ -45,14 +45,14 @@ int get_free_block(const struct VirtualDisk* disk, long size)
     return -1;
 }
 
-// Oznaczenie bloków o zadanym zakresie jako zajęte.
+// Oznaczenie bloków o zadanym zakresie jako zajęte
 void mark_blocks_as_used(struct VirtualDisk* disk, int start_index, long size)
 {
     for (long i = start_index * disk->block_size; i < start_index * disk->block_size + size; i++)
         disk->data[i] = 1;
 }
 
-// Oznaczenie bloków o zadanym zakresie jako wolne.
+// Oznaczenie bloków o zadanym zakresie jako wolne
 void mark_blocks_as_free(struct VirtualDisk* disk, int start_index, long size)
 {
     for (long i = start_index * disk->block_size; i < start_index * disk->block_size + size; i++)
@@ -82,7 +82,7 @@ struct VirtualDisk* create_virtual_disk(int size, int block_size)
     return disk;
 }
 
-// Usuwanie dysku i zwalnianie pamięci.
+// Usuwanie dysku i zwalnianie pamięci. (Na potrzeby testowania z poziomu programu)
 void delete_virtual_disk(struct VirtualDisk* disk)
 {
     if (disk == NULL) return;
@@ -135,8 +135,10 @@ struct VirtualDisk* load_virtual_disk(const char* filename)
 
     return disk;
 }
+
 // Zapisywanie dysku do pliku o zadanej nazwie.
 // Zwraca 0 w przypadku powodzenia lub wartość różną od 0, jeśli wystąpił błąd.
+// Błąd wystąpi tylko w przypadku podania złej nazwy pliku docelowego.
 int save_virtual_disk(const struct VirtualDisk* disk, const char* filename)
 {
     // otwarcie pliku
@@ -164,6 +166,8 @@ int save_virtual_disk(const struct VirtualDisk* disk, const char* filename)
 
 // Dodawanie pliku o zadanej nazwie i rozmiarze do dysku.
 // Zwraca 0 w przypadku powodzenia lub wartość różną od 0, jeśli wystąpił błąd.
+// NOT_ENOUGH_FREE_MEMORY, FILE_WITH_THAT_NAME_EXISTS, MEMORY_ALLOC_ERROR,
+// FREE_BLOCK_NOT_FOUND,
 int add_file_to_virtual_disk(struct VirtualDisk* disk, const char* filename, long size, const char* data)
 {
     // sprawdzenie, czy dysk ma wystarczająco dużo miejsca
@@ -199,7 +203,7 @@ int add_file_to_virtual_disk(struct VirtualDisk* disk, const char* filename, lon
     // zaznaczenie bloków jako zajęte
     mark_blocks_as_used(disk, start_block, size);
 
-    // dodanie pliku do katalogu
+    // dodanie pliku do listy plików dysku
     disk->num_files--;
     strcpy(disk->files[disk->num_files].name, filename);
     disk->files[disk->num_files].size = size;
@@ -213,6 +217,7 @@ int add_file_to_virtual_disk(struct VirtualDisk* disk, const char* filename, lon
 
 // Usuwanie pliku o zadanej nazwie z dysku.
 // Zwraca 0 w przypadku powodzenia lub wartość różną od 0, jeśli wystąpił błąd.
+// FILE_NOT_FOUND_ON_DISK
 int remove_file_from_virtual_disk(struct VirtualDisk* disk, const char* filename)
 {
     // wyszukanie pliku o podanej nazwie
@@ -280,8 +285,9 @@ void print_disk_map(const struct VirtualDisk* disk)
     printf("Zajęte miejsce na dysku: %d B / %d B\n", occ_blocks * disk->block_size, disk->size);
 }
 
-// Kopiowanie pliku z dysku systemu Minix do dysku wirtualnego.
+// Kopiowanie pliku z dysku systemu do dysku wirtualnego.
 // Zwraca 0 w przypadku powodzenia lub wartość różną od 0, jeśli wystąpił błąd.
+// CANT_ACCESS_FILE, Błędy funkcji add_file_to_virtual_disk()
 int copy_file_to_virtual_disk(struct VirtualDisk* disk, const char* src_filename, const char* dest_filename)
 {
     // otwarcie pliku źródłowego
@@ -312,6 +318,9 @@ int copy_file_to_virtual_disk(struct VirtualDisk* disk, const char* src_filename
     return result;
 }
 
+// Kopiowanie pliku z dysku wirtualnego do dysku systemu.
+// Zwraca 0 w przypadku powodzenia lub wartość różną od 0, jeśli wystąpił błąd.
+// CANT_ACCESS_FILE, FILE_NOT_FOUND_ON_DISK
 int copy_file_from_virtual_disk(struct VirtualDisk* disk, const char* src_filename, const char* dest_filename)
 {
     // szukanie pliku o podanej nazwie w katalogu dysku wirtualnego
@@ -347,7 +356,7 @@ int copy_file_from_virtual_disk(struct VirtualDisk* disk, const char* src_filena
     return 0;
 }
 
-
+// Testowanie.
 // int main () {
 //     //struct VirtualDisk* disk = create_virtual_disk(1024, 16);
 //     struct VirtualDisk* disk = load_virtual_disk("dysk.vd");
